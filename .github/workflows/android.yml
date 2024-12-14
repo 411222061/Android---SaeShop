@@ -42,11 +42,13 @@ jobs:
         mkdir -p apk
         mv app/build/outputs/apk/release/*.apk apk/
 
-    # Step 6: Commit and push the APK folder to the repository
+    # Step 6: Commit and push the APK folder to the repository using the GitHub Token
     - name: Commit APK to repository
       run: |
-        git config --global user.name "411222061"
-        git config --global user.email "411222061@mahasiswa.undira.ac.id"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add apk/
         git commit -m "Add APKs [skip ci]"
-        git push
+        git push https://github.com/${{ github.repository }} HEAD:main
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
