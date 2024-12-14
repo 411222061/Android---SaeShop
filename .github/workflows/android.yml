@@ -42,9 +42,11 @@ jobs:
         mkdir -p apk
         mv app/build/outputs/apk/release/*.apk apk/
 
-    # Step 6: Upload the APK as an artifact (optional)
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: APKs
-        path: apk/
+    # Step 6: Commit and push the APK folder to the repository
+    - name: Commit APK to repository
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add apk/
+        git commit -m "Add APKs [skip ci]"
+        git push
