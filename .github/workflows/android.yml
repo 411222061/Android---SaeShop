@@ -45,8 +45,8 @@ jobs:
     # Step 6: Commit and push the APK folder to the repository
     - name: Commit APK to repository
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "411222061"
+        git config --global user.email "411222061@mahasiswa.undira.ac.id"
         git add apk/
         git commit -m "Add APKs [skip ci]"
         git push
