@@ -43,12 +43,13 @@ jobs:
         mv app/build/outputs/apk/release/*.apk apk/
 
     # Step 6: Commit and push the APK folder to the repository using the GitHub Token
+    - name: Set up Git for token authentication
+      uses: actions/setup-git@v2
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+
     - name: Commit APK to repository
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add apk/
         git commit -m "Add APKs [skip ci]"
-        git push https://github.com/${{ github.repository }} HEAD:main
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        git push
