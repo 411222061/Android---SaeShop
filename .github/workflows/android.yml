@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Release APK
 
 on:
   push:
@@ -8,19 +8,19 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android Release APK
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout code
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: Set up JDK for Gradle
+    # Step 2: Set up JDK for Gradle (Java 17)
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'zulu'
 
     # Step 3: Cache Gradle dependencies
@@ -32,8 +32,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    # Step 4: Build APK using Gradle
-    - name: Build APK
+    # Step 4: Build the Release APK
+    - name: Build Release APK
       run: ./gradlew assembleRelease
 
     # Step 5: Move APK to `apk/` directory
