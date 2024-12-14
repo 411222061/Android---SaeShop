@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up JDK for Gradle
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'zulu'
+
+    # Step 3: Cache Gradle dependencies
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    # Step 4: Build APK using Gradle
+    - name: Build APK
+      run: ./gradlew assembleRelease
+
+    # Step 5: Move APK to `apk/` directory
+    - name: Move APK to apk/ directory
+      run: |
+        mkdir -p apk
+        mv app/build/outputs/apk/release/*.apk apk/
+
+    # Step 6: Upload the APK as an artifact (optional)
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: APKs
+        path: apk/
