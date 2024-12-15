@@ -31,13 +31,12 @@ jobs:
 
         # Download Android Command-line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
-        unzip android-tools.zip -d android-sdk
-
+        
         # Create the required directory structure for cmdline-tools/latest
         mkdir -p android-sdk/cmdline-tools/latest
-
-        # Move extracted cmdline-tools into the correct location
-        mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/latest/
+        
+        # Extract the downloaded zip directly into android-sdk/cmdline-tools/latest/
+        unzip android-tools.zip -d android-sdk/cmdline-tools/latest/
 
         # Install platform tools, build tools, and Android platform (version 30)
         yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
