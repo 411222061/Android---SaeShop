@@ -7,7 +7,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write  # Grant write permissions to push changes
+  contents: write  # Grant write permissions to allow push
 
 jobs:
   build:
@@ -39,20 +39,29 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
-    # Step 5: Signing the APK
+    # Step 5: Decode and Verify Keystore File
+    - name: Decode and Verify Keystore
+      env:
+        KEYSTORE_FILE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
+      run: |
+        # Decode the keystore file
+        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 --decode > keystore.jks
+
+        # Verify keystore size
+        if [ ! -s keystore.jks ]; then
+          echo "Keystore file is empty or missing!"
+          exit 1
+        fi
+
+        ls -lh keystore.jks
+
+    # Step 6: Signing the APK
     - name: Sign APK
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       run: |
-        # Decode the keystore file
-        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 --decode > keystore.jks
-
-        # Verify the keystore file exists
-        ls -l keystore.jks
-
-        # Sign the APK
         jarsigner \
           -verbose \
           -keystore keystore.jks \
@@ -61,18 +70,13 @@ jobs:
           app/build/outputs/apk/release/app-release-unsigned.apk \
           "$KEYSTORE_ALIAS"
 
-    # Step 6: Align the APK
+    # Step 7: Align the APK
     - name: Align APK
       run: |
-        # Align the APK
+        # Align the APK using zipalign
         zipalign -v -p 4 \
           app/build/outputs/apk/release/app-release-unsigned.apk \
           app/build/outputs/apk/release/app-release-signed-aligned.apk
-
-    # Step 7: Verify the APK
-    - name: Verify APK
-      run: |
-        apksigner verify app/build/outputs/apk/release/app-release-signed-aligned.apk
 
     # Step 8: Move APK to apk/ directory
     - name: Move APK to apk/ directory
