@@ -46,11 +46,14 @@ jobs:
         echo "Keystore file size:"
         ls -lh keystore.jks
 
-        # Verify keystore size
+        # Verify keystore size and ensure it contains a valid entry
         if [ ! -s keystore.jks ]; then
           echo "Keystore file is empty or missing!"
           exit 1
         fi
+
+        # Verify keystore contents
+        keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || exit 1
 
     - name: Sign APK
       env:
@@ -58,6 +61,7 @@ jobs:
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       run: |
+        # Sign the APK
         jarsigner \
           -verbose \
           -keystore keystore.jks \
@@ -68,6 +72,7 @@ jobs:
 
     - name: Align APK
       run: |
+        # Align the APK using zipalign
         zipalign -v -p 4 \
           app/build/outputs/apk/release/app-release-unsigned.apk \
           app/build/outputs/apk/release/app-release-signed-aligned.apk
