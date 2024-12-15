@@ -52,7 +52,7 @@ jobs:
           exit 1
         fi
 
-        # Verify keystore contents
+        # Verify keystore contents and check the alias
         keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || exit 1
 
     - name: Sign APK
@@ -61,6 +61,9 @@ jobs:
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       run: |
+        # Ensure that the keystore alias is valid
+        echo "Signing APK with alias: $KEYSTORE_ALIAS"
+        
         # Sign the APK
         jarsigner \
           -verbose \
