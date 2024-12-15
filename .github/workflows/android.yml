@@ -38,6 +38,9 @@ jobs:
         # Extract the downloaded zip directly into android-sdk/cmdline-tools/latest/
         unzip android-tools.zip -d android-sdk/cmdline-tools/latest/
 
+        # Debugging step: List contents of the directory
+        ls -R android-sdk/cmdline-tools/
+
         # Install platform tools, build tools, and Android platform (version 30)
         yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
