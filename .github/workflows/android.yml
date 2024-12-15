@@ -29,29 +29,29 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y openjdk-17-jdk wget unzip
 
-        # Download Android Command-line Tools
+        # Download Android Command-line Tools (latest version)
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
         unzip android-tools.zip -d android-sdk
 
-        # Check if the folder structure is correct after extraction
+        # Check the extracted directory structure
         ls -R android-sdk/
 
-        # Create the required directory structure for cmdline-tools
-        mkdir -p android-sdk/cmdline-tools
+        # Create the required directory structure for cmdline-tools/latest
+        mkdir -p android-sdk/cmdline-tools/latest
 
-        # Move extracted tools to the correct folder structure
-        mv android-sdk/tools android-sdk/cmdline-tools/latest
+        # Move the extracted tools into the latest directory
+        mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/latest/
 
-        # Check the sdkmanager path
-        ls -R android-sdk/cmdline-tools/latest
+        # Check if sdkmanager is present in the expected directory
+        ls -R android-sdk/cmdline-tools/latest/
 
-        # Ensure sdkmanager exists
+        # Ensure sdkmanager exists and is executable
         if [ ! -f "android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
           echo "sdkmanager not found in android-sdk/cmdline-tools/latest/bin!"
           exit 1
         fi
 
-        # Accept licenses and install necessary packages
+        # Install required SDK components
         yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
