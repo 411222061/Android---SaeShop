@@ -31,26 +31,29 @@ jobs:
 
         # Download Android Command-line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
+        unzip android-tools.zip -d android-sdk
+
+        # Check if the folder structure is correct after extraction
+        ls -R android-sdk/
 
         # Create the required directory structure for cmdline-tools
         mkdir -p android-sdk/cmdline-tools
 
-        # Extract directly to the correct folder (cmdline-tools/latest)
-        unzip android-tools.zip -d android-sdk/cmdline-tools
+        # Move extracted tools to the correct folder structure
+        mv android-sdk/tools android-sdk/cmdline-tools/latest
 
-        # Check if sdkmanager exists and is in the right place
-        echo "Listing contents of android-sdk/cmdline-tools/"
-        ls -R android-sdk/cmdline-tools
+        # Check the sdkmanager path
+        ls -R android-sdk/cmdline-tools/latest
 
-        # Check if sdkmanager exists at the expected location
-        if [ ! -f "android-sdk/cmdline-tools/tools/bin/sdkmanager" ]; then
-          echo "sdkmanager not found in android-sdk/cmdline-tools/tools/bin!"
+        # Ensure sdkmanager exists
+        if [ ! -f "android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          echo "sdkmanager not found in android-sdk/cmdline-tools/latest/bin!"
           exit 1
         fi
 
         # Accept licenses and install necessary packages
-        yes | android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
-        android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+        yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
