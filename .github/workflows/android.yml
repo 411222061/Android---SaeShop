@@ -39,7 +39,7 @@ jobs:
         # Create the required directory structure for cmdline-tools/latest
         mkdir -p android-sdk/cmdline-tools/latest
 
-        # Move extracted files into the correct directory (ensuring proper structure)
+        # Move all files from extracted cmdline-tools to the latest folder, avoiding moving the 'latest' directory itself
         mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/latest/
 
         # Set ANDROID_HOME environment variable to the SDK directory
