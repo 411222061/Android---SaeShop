@@ -33,7 +33,7 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
         unzip android-tools.zip -d android-sdk
 
-        # Create the required directory structure
+        # Create the required directory structure for cmdline-tools/latest
         mkdir -p android-sdk/cmdline-tools/latest
 
         # Move extracted cmdline-tools into the correct location
