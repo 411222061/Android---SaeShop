@@ -7,7 +7,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write  # Grant write permissions to allow push
+  contents: write  # Grant write permissions to push changes
 
 jobs:
   build:
@@ -46,8 +46,11 @@ jobs:
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       run: |
-        # Ensure the keystore file is available
-        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > keystore.jks
+        # Decode the keystore file
+        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 --decode > keystore.jks
+
+        # Verify the keystore file exists
+        ls -l keystore.jks
 
         # Sign the APK
         jarsigner \
@@ -61,18 +64,23 @@ jobs:
     # Step 6: Align the APK
     - name: Align APK
       run: |
-        # Align the APK using zipalign
+        # Align the APK
         zipalign -v -p 4 \
           app/build/outputs/apk/release/app-release-unsigned.apk \
           app/build/outputs/apk/release/app-release-signed-aligned.apk
 
-    # Step 7: Move APK to apk/ directory
+    # Step 7: Verify the APK
+    - name: Verify APK
+      run: |
+        apksigner verify app/build/outputs/apk/release/app-release-signed-aligned.apk
+
+    # Step 8: Move APK to apk/ directory
     - name: Move APK to apk/ directory
       run: |
         mkdir -p apk
         mv app/build/outputs/apk/release/app-release-signed-aligned.apk apk/
 
-    # Step 8: Commit and push the APK to the repository
+    # Step 9: Commit and push the APK to the repository
     - name: Commit APK to repository
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
