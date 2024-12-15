@@ -30,12 +30,12 @@ jobs:
     #     unzip cmdline-tools.zip -d android-sdk/cmdline-tools
     #     mv android-sdk/cmdline-tools/cmdline-tools android-sdk/cmdline-tools/latest
 
-    - name: Set up Android Tools
-      run: |
-        export ANDROID_HOME=$PWD/android-sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+    # - name: Set up Android Tools
+    #   run: |
+    #     export ANDROID_HOME=$PWD/android-sdk
+    #     export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+    #     yes | sdkmanager --licenses
+    #     sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
     - name: Build Release APK
       run: ./gradlew assembleRelease
