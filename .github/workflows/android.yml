@@ -24,36 +24,6 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
-    - name: Install Android SDK and tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y openjdk-17-jdk wget unzip
-
-        # Download Android Command-line Tools (latest version)
-        wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
-        unzip android-tools.zip -d android-sdk
-
-        # Check the extracted directory structure
-        ls -R android-sdk/
-
-        # Create the required directory structure for cmdline-tools/latest
-        mkdir -p android-sdk/cmdline-tools/latest
-
-        # Move all files from extracted cmdline-tools to the latest folder, avoiding moving the 'latest' directory itself
-        mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/latest/
-
-        # Set ANDROID_HOME environment variable to the SDK directory
-        export ANDROID_HOME=$(pwd)/android-sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH
-
-        # Verify the sdkmanager is now accessible
-        echo "Verifying sdkmanager..."
-        sdkmanager --version
-
-        # Accept licenses and install required components
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
-
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
       with:
