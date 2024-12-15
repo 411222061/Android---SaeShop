@@ -31,7 +31,7 @@ jobs:
 
         # Download Android Command-line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
-        
+
         # Create the required directory structure for cmdline-tools/latest
         mkdir -p android-sdk/cmdline-tools/latest
         
@@ -39,8 +39,16 @@ jobs:
         unzip android-tools.zip -d android-sdk/cmdline-tools/latest/
 
         # Debugging step: List contents of the directory
+        echo "Listing the directory structure of android-sdk/cmdline-tools/"
         ls -R android-sdk/cmdline-tools/
 
+        # Check if sdkmanager exists and is executable
+        echo "Checking for sdkmanager in the path:"
+        if [ ! -f "android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          echo "sdkmanager not found!"
+          exit 1
+        fi
+        
         # Install platform tools, build tools, and Android platform (version 30)
         yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
