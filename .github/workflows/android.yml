@@ -36,26 +36,23 @@ jobs:
         # Check the extracted directory structure
         ls -R android-sdk/
 
-        # Create the required directory structure for cmdline-tools
-        mkdir -p android-sdk/cmdline-tools
+        # Create the required directory structure for cmdline-tools/latest
+        mkdir -p android-sdk/cmdline-tools/latest
 
-        # Move extracted files to correct locations (do not overwrite)
-        for file in android-sdk/cmdline-tools/*; do
-          # Only move files that are not already present in the target directory
-          if [ ! -e "android-sdk/cmdline-tools/$(basename $file)" ]; then
-            mv "$file" android-sdk/cmdline-tools/
-          fi
-        done
+        # Move extracted files into the correct directory (ensuring proper structure)
+        mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/latest/
 
-        # Ensure sdkmanager exists and is executable
-        if [ ! -f "android-sdk/cmdline-tools/bin/sdkmanager" ]; then
-          echo "sdkmanager not found in android-sdk/cmdline-tools/bin!"
-          exit 1
-        fi
+        # Set ANDROID_HOME environment variable to the SDK directory
+        export ANDROID_HOME=$(pwd)/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH
 
-        # Install required SDK components
-        yes | android-sdk/cmdline-tools/bin/sdkmanager --licenses
-        android-sdk/cmdline-tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+        # Verify the sdkmanager is now accessible
+        echo "Verifying sdkmanager..."
+        sdkmanager --version
+
+        # Accept licenses and install required components
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
