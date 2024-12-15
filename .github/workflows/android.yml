@@ -32,26 +32,25 @@ jobs:
         # Download Android Command-line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
 
-        # Create the required directory structure for cmdline-tools/latest
-        mkdir -p android-sdk/cmdline-tools/latest
-        
-        # Extract the downloaded zip directly into android-sdk/cmdline-tools/latest/
-        unzip android-tools.zip -d android-sdk/cmdline-tools/latest/
+        # Create the required directory structure for cmdline-tools
+        mkdir -p android-sdk/cmdline-tools
 
-        # Debugging step: List contents of the directory
-        echo "Listing the directory structure of android-sdk/cmdline-tools/"
-        ls -R android-sdk/cmdline-tools/
+        # Extract directly to the correct folder (cmdline-tools/latest)
+        unzip android-tools.zip -d android-sdk/cmdline-tools
 
-        # Check if sdkmanager exists and is executable
-        echo "Checking for sdkmanager in the path:"
-        if [ ! -f "android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
-          echo "sdkmanager not found!"
+        # Check if sdkmanager exists and is in the right place
+        echo "Listing contents of android-sdk/cmdline-tools/"
+        ls -R android-sdk/cmdline-tools
+
+        # Check if sdkmanager exists at the expected location
+        if [ ! -f "android-sdk/cmdline-tools/tools/bin/sdkmanager" ]; then
+          echo "sdkmanager not found in android-sdk/cmdline-tools/tools/bin!"
           exit 1
         fi
-        
-        # Install platform tools, build tools, and Android platform (version 30)
-        yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-        android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+
+        # Accept licenses and install necessary packages
+        yes | android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
+        android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
