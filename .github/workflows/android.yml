@@ -1,4 +1,4 @@
-name: Build Release APK
+name: Build Signed Release APK SaeShop
 
 on:
   push:
@@ -11,19 +11,22 @@ permissions:
 
 jobs:
   build:
-    name: Build Android Release APK
+    name: Build and Sign Android Release APK
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # Step 2: Set up JDK for Gradle (Java 17)
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'zulu'
 
+    # Step 3: Cache Gradle dependencies
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
       with:
@@ -32,18 +35,50 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
+    # Step 4: Build the Release APK
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
+    # Step 5: Signing the APK
+    - name: Sign APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+        KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+      run: |
+        # Ensure the keystore file is available
+        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > keystore.jks
+
+        # Sign the APK
+        jarsigner \
+          -verbose \
+          -keystore keystore.jks \
+          -storepass "$KEYSTORE_PASSWORD" \
+          -keypass "$KEYSTORE_KEY_PASSWORD" \
+          app/build/outputs/apk/release/app-release-unsigned.apk \
+          "$KEYSTORE_ALIAS"
+
+    # Step 6: Align the APK
+    - name: Align APK
+      run: |
+        # Align the APK using zipalign
+        zipalign -v -p 4 \
+          app/build/outputs/apk/release/app-release-unsigned.apk \
+          app/build/outputs/apk/release/app-release-signed-aligned.apk
+
+    # Step 7: Move APK to apk/ directory
     - name: Move APK to apk/ directory
       run: |
         mkdir -p apk
-        mv app/build/outputs/apk/release/*.apk apk/
+        mv app/build/outputs/apk/release/app-release-signed-aligned.apk apk/
 
+    # Step 8: Commit and push the APK to the repository
     - name: Commit APK to repository
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add apk/
-        git commit -m "Add APKs [skip ci]"
+        git commit -m "Add Signed and Aligned APK [skip ci]"
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
