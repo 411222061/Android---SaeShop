@@ -18,69 +18,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'zulu'
-
-    - name: Cache Gradle dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    - name: Build Release APK
-      run: ./gradlew assembleRelease
-
-    - name: Decode and Verify Keystore
-      env:
-        KEYSTORE_FILE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
+    - name: Use Docker Image with Android SDK and Tools
       run: |
-        # Decode the keystore file
-        echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 --decode > keystore.jks
-
-        # Log the keystore file size for debugging
-        echo "Keystore file size:"
-        ls -lh keystore.jks
-
-        # Verify keystore size and ensure it contains a valid entry
-        if [ ! -s keystore.jks ]; then
-          echo "Keystore file is empty or missing!"
-          exit 1
-        fi
-
-        # Verify keystore contents and check the alias
-        echo "Verifying keystore contents..."
-        keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || exit 1
-        keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" -alias "${{ secrets.KEYSTORE_ALIAS }}" || exit 1
-
-    - name: Sign APK
-      env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-        KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
-      run: |
-        # Ensure that the keystore alias is valid
-        echo "Signing APK with alias: $KEYSTORE_ALIAS"
-
-        # Sign the APK
-        jarsigner \
-          -verbose \
-          -keystore keystore.jks \
-          -storepass "$KEYSTORE_PASSWORD" \
-          -keypass "$KEYSTORE_KEY_PASSWORD" \
-          app/build/outputs/apk/release/app-release-unsigned.apk \
-          "$KEYSTORE_ALIAS"
-
-    - name: Align APK
-      run: |
-        # Align the APK using zipalign
-        zipalign -v -p 4 \
-          app/build/outputs/apk/release/app-release-unsigned.apk \
-          app/build/outputs/apk/release/app-release-signed-aligned.apk
+        docker run --rm \
+          -v $PWD:/workspace \
+          -w /workspace \
+          ghcr.io/andrewmcodes/android-tools:latest \
+          bash -c "
+          ./gradlew assembleRelease &&
+          echo '${{ secrets.KEYSTORE_FILE_BASE64 }}' | base64 --decode > keystore.jks &&
+          jarsigner \
+            -verbose \
+            -keystore keystore.jks \
+            -storepass '${{ secrets.KEYSTORE_PASSWORD }}' \
+            -keypass '${{ secrets.KEYSTORE_KEY_PASSWORD }}' \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            '${{ secrets.KEYSTORE_ALIAS }}' &&
+          zipalign -v -p 4 \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            app/build/outputs/apk/release/app-release-signed-aligned.apk
+          "
 
     - name: Move APK to apk/ directory
       run: |
