@@ -77,7 +77,7 @@ jobs:
     - name: Move APK to apk/ directory
       run: |
         mkdir -p apk
-        mv app/build/outputs/apk/release/app-release-signed-aligned.apk apk/
+        mv app/release/app-release.apk apk/
 
     - name: Commit APK to repository
       env:
