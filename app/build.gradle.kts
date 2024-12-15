@@ -16,15 +16,27 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore.jks")       // Path ke keystore
+            storePassword = "SaeShop"              // Kata sandi keystore
+            keyAlias = "keystore"                   // Alias kunci
+            keyPassword = "SaeShop"                // Kata sandi kunci
         }
     }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false               // Optimasi APK
+            isShrinkResources = false             // Jangan kompresi resource
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), // File proguard default
+                "proguard-rules.pro"                               // File proguard custom
+            )
+            signingConfig = signingConfigs.getByName("release") // Menetapkan signingConfig
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -32,7 +44,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
