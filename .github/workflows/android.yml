@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   build:
-    name: Build and Sign Android Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -69,6 +68,11 @@ jobs:
         zipalign -v -p 4 \
           app/build/outputs/apk/release/app-release-unsigned.apk \
           app/build/outputs/apk/release/app-release-signed-aligned.apk
+
+    - name: Verify APK Integrity
+      run: |
+        export PATH=$PWD/android-sdk/build-tools/30.0.3:$PATH
+        apksigner verify --verbose app/build/outputs/apk/release/app-release-signed-aligned.apk
 
     - name: Move APK to apk/ directory
       run: |
