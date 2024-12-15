@@ -6,24 +6,24 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: write  # Grant write permissions to allow push
+
 jobs:
   build:
     name: Build Android Release APK
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: Set up JDK for Gradle (Java 17)
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'zulu'
 
-    # Step 3: Cache Gradle dependencies
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
       with:
@@ -32,17 +32,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    # Step 4: Build the Release APK
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
-    # Step 5: Move APK to `apk/` directory
     - name: Move APK to apk/ directory
       run: |
         mkdir -p apk
         mv app/build/outputs/apk/release/*.apk apk/
 
-    # Step 6: Commit and push the APK folder to the repository
     - name: Commit APK to repository
       run: |
         git config --global user.name "github-actions[bot]"
