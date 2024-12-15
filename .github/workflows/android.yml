@@ -24,6 +24,15 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
+    - name: Install Android SDK and tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-17-jdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-tools.zip
+        unzip android-tools.zip -d android-sdk
+        yes | ./android-sdk/tools/bin/sdkmanager --licenses
+        ./android-sdk/tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
       with:
@@ -53,7 +62,9 @@ jobs:
         fi
 
         # Verify keystore contents and check the alias
+        echo "Verifying keystore contents..."
         keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || exit 1
+        keytool -list -keystore keystore.jks -storepass "${{ secrets.KEYSTORE_PASSWORD }}" -alias "${{ secrets.KEYSTORE_ALIAS }}" || exit 1
 
     - name: Sign APK
       env:
@@ -63,7 +74,7 @@ jobs:
       run: |
         # Ensure that the keystore alias is valid
         echo "Signing APK with alias: $KEYSTORE_ALIAS"
-        
+
         # Sign the APK
         jarsigner \
           -verbose \
