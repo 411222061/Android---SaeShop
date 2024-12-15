@@ -39,8 +39,13 @@ jobs:
         # Create the required directory structure for cmdline-tools
         mkdir -p android-sdk/cmdline-tools
 
-        # Move the extracted tools into the cmdline-tools folder
-        mv android-sdk/cmdline-tools/* android-sdk/cmdline-tools/
+        # Move extracted files to correct locations (do not overwrite)
+        for file in android-sdk/cmdline-tools/*; do
+          # Only move files that are not already present in the target directory
+          if [ ! -e "android-sdk/cmdline-tools/$(basename $file)" ]; then
+            mv "$file" android-sdk/cmdline-tools/
+          fi
+        done
 
         # Ensure sdkmanager exists and is executable
         if [ ! -f "android-sdk/cmdline-tools/bin/sdkmanager" ]; then
